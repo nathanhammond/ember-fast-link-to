@@ -1,0 +1,1 @@
+export { default } from 'ember-link-three/components/link-three';
