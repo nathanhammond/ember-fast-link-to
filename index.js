@@ -2,5 +2,5 @@
 'use strict';
 
 module.exports = {
-  name: 'ember-link-three'
+  name: 'ember-fast-link-to'
 };

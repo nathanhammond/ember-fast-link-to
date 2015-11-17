@@ -1,18 +1,18 @@
 import Ember from 'ember';
-import layout from '../templates/components/link-three';
+import layout from '../templates/components/fast-link-to';
 
 let { assert, computed, deprecate, get, inject, ControllerMixin, Logger } = Ember;
 let EmberComponent = Ember.Component;
 let isSimpleClick = Ember.ViewUtils.isSimpleClick;
 
 
-let LinkThreeComponent = EmberComponent.extend({
+let FastLinkComponent = EmberComponent.extend({
   layout: layout,
 
   tagName: 'a',
 
   /**
-    Sets the `title` attribute of the `LinkComponent`'s HTML element.
+    Sets the `title` attribute of the `FastLinkComponent`'s HTML element.
 
     @property title
     @default null
@@ -21,7 +21,7 @@ let LinkThreeComponent = EmberComponent.extend({
   title: null,
 
   /**
-    Sets the `rel` attribute of the `LinkComponent`'s HTML element.
+    Sets the `rel` attribute of the `FastLinkComponent`'s HTML element.
 
     @property rel
     @default null
@@ -30,7 +30,7 @@ let LinkThreeComponent = EmberComponent.extend({
   rel: null,
 
   /**
-    Sets the `tabindex` attribute of the `LinkComponent`'s HTML element.
+    Sets the `tabindex` attribute of the `FastLinkComponent`'s HTML element.
 
     @property tabindex
     @default null
@@ -39,7 +39,7 @@ let LinkThreeComponent = EmberComponent.extend({
   tabindex: null,
 
   /**
-    Sets the `target` attribute of the `LinkComponent`'s HTML element.
+    Sets the `target` attribute of the `FastLinkComponent`'s HTML element.
 
     @since 1.8.0
     @property target
@@ -49,7 +49,7 @@ let LinkThreeComponent = EmberComponent.extend({
   target: null,
 
   /**
-    The CSS class to apply to `LinkComponent`'s element when its `loading`
+    The CSS class to apply to `FastLinkComponent`'s element when its `loading`
     property is `true`.
 
     @property loadingClass
@@ -60,7 +60,7 @@ let LinkThreeComponent = EmberComponent.extend({
   loadingClass: 'loading',
 
   /**
-    Determines whether the `LinkComponent` will trigger routing via
+    Determines whether the `FastLinkComponent` will trigger routing via
     the `replaceWith` routing strategy.
 
     @property replace
@@ -71,7 +71,7 @@ let LinkThreeComponent = EmberComponent.extend({
   replace: false,
 
   /**
-    By default the `{{link-to}}` component will bind to the `href` and
+    By default the `{{fast-link-to}}` component will bind to the `href` and
     `title` attributes. It's discouraged that you override these defaults,
     however you can push onto the array if needed.
 
@@ -83,7 +83,7 @@ let LinkThreeComponent = EmberComponent.extend({
   attributeBindings: ['href', 'title', 'rel', 'tabindex', 'target'],
 
   /**
-    By default the `{{link-to}}` component will bind to the `loading`,
+    By default the `{{fast-link-to}}` component will bind to the `loading`,
     class. It is discouraged to override these directly.
 
     @property classNameBindings
@@ -94,7 +94,7 @@ let LinkThreeComponent = EmberComponent.extend({
   classNameBindings: ['loading'],
 
   /**
-    By default the `{{link-to}}` component responds to the `click` event. You
+    By default the `{{fast-link-to}}` component responds to the `click` event. You
     can override this globally by setting this property to your custom
     event name.
 
@@ -112,7 +112,7 @@ let LinkThreeComponent = EmberComponent.extend({
   // section of the API documentation, which is where
   // people will likely go looking for it.
   /**
-    Triggers the `LinkComponent`'s routing behavior. If
+    Triggers the `FastLinkComponent`'s routing behavior. If
     `eventName` is changed to a value other than `click`
     the routing behavior will trigger on that custom event
     instead.
@@ -122,12 +122,12 @@ let LinkThreeComponent = EmberComponent.extend({
   */
 
   /**
-    An overridable method called when `LinkComponent` objects are instantiated.
+    An overridable method called when `FastLinkComponent` objects are instantiated.
 
     Example:
 
     ```javascript
-    App.MyLinkComponent = Ember.LinkComponent.extend({
+    App.MyLinkComponent = Ember.FastLinkComponent.extend({
       init: function() {
         this._super.apply(this, arguments);
         Ember.Logger.log('Event is ' + this.get('eventName'));
@@ -177,7 +177,7 @@ let LinkThreeComponent = EmberComponent.extend({
     if (get(this, 'bubbles') === false) { event.stopPropagation(); }
 
     if (get(this, 'loading')) {
-      Logger.warn('This link-to is in an inactive loading state because at least one of its parameters presently has a null/undefined value, or the provided route name is invalid.');
+      Logger.warn('This fast-link-to is in an inactive loading state because at least one of its parameters presently has a null/undefined value, or the provided route name is invalid.');
       return false;
     }
 
@@ -196,20 +196,20 @@ let LinkThreeComponent = EmberComponent.extend({
 
   queryParams: null,
 
-  qualifiedRouteName: computed('targetRouteName', '_routing.currentState', function computeLinkToComponentQualifiedRouteName() {
+  qualifiedRouteName: computed('targetRouteName', '_routing.currentState', function computeFastLinkToComponentQualifiedRouteName() {
     let params = get(this, 'params').slice();
     let lastParam = params[params.length - 1];
     if (lastParam && lastParam.isQueryParams) {
       params.pop();
     }
-    let onlyQueryParamsSupplied = (params.length === 1);
+    let onlyQueryParamsSupplied = (params.length === 0);
     if (onlyQueryParamsSupplied) {
       return get(this, '_routing.currentRouteName');
     }
     return get(this, 'targetRouteName');
   }),
 
-  resolvedQueryParams: computed('queryParams', function computeLinkToComponentResolvedQueryParams() {
+  resolvedQueryParams: computed('queryParams', function computeFastLinkToComponentResolvedQueryParams() {
     let resolvedQueryParams = {};
     let queryParams = get(this, 'queryParams');
 
@@ -226,15 +226,15 @@ let LinkThreeComponent = EmberComponent.extend({
 
   /**
     Sets the element's `href` attribute to the url for
-    the `LinkComponent`'s targeted route.
+    the `FastLinkComponent`'s targeted route.
 
-    If the `LinkComponent`'s `tagName` is changed to a value other
+    If the `FastLinkComponent`'s `tagName` is changed to a value other
     than `a`, this property will be ignored.
 
     @property href
     @private
   */
-  href: computed('models', 'qualifiedRouteName', function computeLinkToComponentHref() {
+  href: computed('models', 'qualifiedRouteName', function computeFastLinkToComponentHref() {
     if (get(this, 'tagName') !== 'a') { return; }
 
     let qualifiedRouteName = get(this, 'qualifiedRouteName');
@@ -247,7 +247,7 @@ let LinkThreeComponent = EmberComponent.extend({
     return routing.generateURL(qualifiedRouteName, models, queryParams);
   }),
 
-  loading: computed('_modelsAreLoaded', 'qualifiedRouteName', function computeLinkToComponentLoading() {
+  loading: computed('_modelsAreLoaded', 'qualifiedRouteName', function computeFastLinkToComponentLoading() {
     let qualifiedRouteName = get(this, 'qualifiedRouteName');
     let modelsAreLoaded = get(this, '_modelsAreLoaded');
 
@@ -256,7 +256,7 @@ let LinkThreeComponent = EmberComponent.extend({
     }
   }),
 
-  _modelsAreLoaded: computed('models', function computeLinkToComponentModelsAreLoaded() {
+  _modelsAreLoaded: computed('models', function computeFastLinkToComponentModelsAreLoaded() {
     let models = get(this, 'models');
     for (let i = 0, l = models.length; i < l; i++) {
       if (models[i] == null) { return false; }
@@ -274,8 +274,8 @@ let LinkThreeComponent = EmberComponent.extend({
 
       while (ControllerMixin.detect(value)) {
         deprecate(
-          'Providing `{{link-to}}` with a param that is wrapped in a controller is deprecated. ' +
-            (this.parentView ? 'Please update `' + this.parentView + '` to use `{{link-to "post" someController.model}}` instead.' : ''),
+          'Providing `{{fast-link-to}}` with a param that is wrapped in a controller is deprecated. ' +
+            (this.parentView ? 'Please update `' + this.parentView + '` to use `{{fast-link-to "post" someController.model}}` instead.' : ''),
           false,
           { id: 'ember-routing-views.controller-wrapped-param', until: '3.0.0' }
         );
@@ -289,7 +289,7 @@ let LinkThreeComponent = EmberComponent.extend({
   },
 
   /**
-    The default href value to use while a link-to is loading.
+    The default href value to use while a fast-link-to is loading.
     Only applies when tagName is 'a'
 
     @property loadingHref
@@ -305,7 +305,7 @@ let LinkThreeComponent = EmberComponent.extend({
     // Do not mutate params in place
     let params = get(this, 'params').slice();
 
-    assert('You must provide one or more parameters to the link-to component.', params.length);
+    assert('You must provide one or more parameters to the fast-link-to component.', params.length);
 
     // Process the positional arguments, in order.
 
@@ -331,10 +331,10 @@ let LinkThreeComponent = EmberComponent.extend({
   }
 });
 
-LinkThreeComponent.toString = function() { return 'LinkThreeComponent'; };
+FastLinkComponent.toString = function() { return 'FastLinkComponent'; };
 
-LinkThreeComponent.reopenClass({
+FastLinkComponent.reopenClass({
   positionalParams: 'params'
 });
 
-export default LinkThreeComponent;
+export default FastLinkComponent;
