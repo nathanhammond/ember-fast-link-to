@@ -1,9 +1,8 @@
 import Ember from 'ember';
 import layout from '../templates/components/fast-link-to';
 
-let { assert, computed, deprecate, get, inject, ControllerMixin, Logger } = Ember;
+let { assert, get, inject } = Ember;
 let EmberComponent = Ember.Component;
-let isSimpleClick = Ember.ViewUtils.isSimpleClick;
 
 
 let FastLinkComponent = EmberComponent.extend({
@@ -60,6 +59,18 @@ let FastLinkComponent = EmberComponent.extend({
   loadingClass: 'loading',
 
   /**
+    The CSS class to apply to a `FastLinkComponent`'s element when its `disabled`
+    property is `true`.
+
+    @property disabledClass
+    @type String
+    @default disabled
+    @private
+  **/
+  disabledClass: 'disabled',
+  _isDisabled: false,
+
+  /**
     Determines whether the `FastLinkComponent` will trigger routing via
     the `replaceWith` routing strategy.
 
@@ -83,15 +94,15 @@ let FastLinkComponent = EmberComponent.extend({
   attributeBindings: ['href', 'title', 'rel', 'tabindex', 'target'],
 
   /**
-    By default the `{{fast-link-to}}` component will bind to the `loading`,
-    class. It is discouraged to override these directly.
+    By default the `{{fast-link-to}}` component will bind to the `loading` and
+    `disabled` classes. It is discouraged to override these directly.
 
     @property classNameBindings
     @type Array
-    @default ['loading']
+    @default ['loading', 'disabled']
     @public
   */
-  classNameBindings: ['loading'],
+  classNameBindings: ['loading', 'disabled'],
 
   /**
     By default the `{{fast-link-to}}` component responds to the `click` event. You
@@ -144,15 +155,11 @@ let FastLinkComponent = EmberComponent.extend({
     @method init
     @private
   */
-  init() {
-    this._super(...arguments);
-
-    // Map desired event name to invoke function
-    let eventName = get(this, 'eventName');
-    this.on(eventName, this, this._invoke);
-  },
+  init: Ember.LinkComponent.proto().init,
 
   _routing: inject.service('-routing'),
+
+  disabled: Ember.LinkComponent.proto().disabled,
 
   /**
     Event handler that invokes the link, activating the associated route.
@@ -162,67 +169,13 @@ let FastLinkComponent = EmberComponent.extend({
     @param {Event} event
     @private
   */
-  _invoke(event) {
-    if (!isSimpleClick(event)) { return true; }
-
-    let preventDefault = get(this, 'preventDefault');
-    let targetAttribute = get(this, 'target');
-
-    if (preventDefault !== false) {
-      if (!targetAttribute || targetAttribute === '_self') {
-        event.preventDefault();
-      }
-    }
-
-    if (get(this, 'bubbles') === false) { event.stopPropagation(); }
-
-    if (get(this, 'loading')) {
-      Logger.warn('This fast-link-to is in an inactive loading state because at least one of its parameters presently has a null/undefined value, or the provided route name is invalid.');
-      return false;
-    }
-
-    if (targetAttribute && targetAttribute !== '_self') {
-      return false;
-    }
-
-    let routing = get(this, '_routing');
-    let qualifiedRouteName = get(this, 'qualifiedRouteName');
-    let models = get(this, 'models');
-    let queryParamValues = get(this, 'queryParams.values');
-    let shouldReplace = get(this, 'replace');
-
-    routing.transitionTo(qualifiedRouteName, models, queryParamValues, shouldReplace);
-  },
+  _invoke: Ember.LinkComponent.proto()._invoke,
 
   queryParams: null,
 
-  qualifiedRouteName: computed('targetRouteName', '_routing.currentState', function computeFastLinkToComponentQualifiedRouteName() {
-    let params = get(this, 'params').slice();
-    let lastParam = params[params.length - 1];
-    if (lastParam && lastParam.isQueryParams) {
-      params.pop();
-    }
-    let onlyQueryParamsSupplied = (params.length === 0);
-    if (onlyQueryParamsSupplied) {
-      return get(this, '_routing.currentRouteName');
-    }
-    return get(this, 'targetRouteName');
-  }),
+  qualifiedRouteName: Ember.LinkComponent.proto().qualifiedRouteName,
 
-  resolvedQueryParams: computed('queryParams', function computeFastLinkToComponentResolvedQueryParams() {
-    let resolvedQueryParams = {};
-    let queryParams = get(this, 'queryParams');
-
-    if (!queryParams) { return resolvedQueryParams; }
-
-    let values = queryParams.values;
-    for (let key in values) {
-      if (!values.hasOwnProperty(key)) { continue; }
-      resolvedQueryParams[key] = values[key];
-    }
-
-    return resolvedQueryParams;
-  }),
+  resolvedQueryParams: Ember.LinkComponent.proto().resolvedQueryParams,
 
   /**
     Sets the element's `href` attribute to the url for
@@ -234,59 +187,13 @@ let FastLinkComponent = EmberComponent.extend({
     @property href
     @private
   */
-  href: computed('models', 'qualifiedRouteName', function computeFastLinkToComponentHref() {
-    if (get(this, 'tagName') !== 'a') { return; }
+  href: Ember.LinkComponent.proto().href,
 
-    let qualifiedRouteName = get(this, 'qualifiedRouteName');
-    let models = get(this, 'models');
+  loading: Ember.LinkComponent.proto().loading,
 
-    if (get(this, 'loading')) { return get(this, 'loadingHref'); }
+  _modelsAreLoaded: Ember.LinkComponent.proto()._modelsAreLoaded,
 
-    let routing = get(this, '_routing');
-    let queryParams = get(this, 'queryParams.values');
-    return routing.generateURL(qualifiedRouteName, models, queryParams);
-  }),
-
-  loading: computed('_modelsAreLoaded', 'qualifiedRouteName', function computeFastLinkToComponentLoading() {
-    let qualifiedRouteName = get(this, 'qualifiedRouteName');
-    let modelsAreLoaded = get(this, '_modelsAreLoaded');
-
-    if (!modelsAreLoaded || qualifiedRouteName == null) {
-      return get(this, 'loadingClass');
-    }
-  }),
-
-  _modelsAreLoaded: computed('models', function computeFastLinkToComponentModelsAreLoaded() {
-    let models = get(this, 'models');
-    for (let i = 0, l = models.length; i < l; i++) {
-      if (models[i] == null) { return false; }
-    }
-
-    return true;
-  }),
-
-  _getModels(params) {
-    let modelCount = params.length - 1;
-    let models = new Array(modelCount);
-
-    for (let i = 0; i < modelCount; i++) {
-      let value = params[i + 1];
-
-      while (ControllerMixin.detect(value)) {
-        deprecate(
-          'Providing `{{fast-link-to}}` with a param that is wrapped in a controller is deprecated. ' +
-            (this.parentView ? 'Please update `' + this.parentView + '` to use `{{fast-link-to "post" someController.model}}` instead.' : ''),
-          false,
-          { id: 'ember-routing-views.controller-wrapped-param', until: '3.0.0' }
-        );
-        value = value.get('model');
-      }
-
-      models[i] = value;
-    }
-
-    return models;
-  },
+  _getModels: Ember.LinkComponent.proto()._getModels,
 
   /**
     The default href value to use while a fast-link-to is loading.
