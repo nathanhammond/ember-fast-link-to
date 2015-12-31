@@ -9,7 +9,7 @@ The default implementation of `{{link-to}}` inside of Ember tries to do too much
 
 ## Installation
 
-* `ember install fast-link-to`
+* `ember install ember-fast-link-to`
 
 ## Usage
 
