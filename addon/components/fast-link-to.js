@@ -238,7 +238,13 @@ let FastLinkComponent = EmberComponent.extend({
     // Process the positional arguments, in order.
 
     // 2. `targetRouteName` is now always at index 0.
-    this.set('targetRouteName', params[0]);
+    let owner = Ember.getOwner && Ember.getOwner(this);
+    if (owner && owner.mountPoint) {
+      let fullRouteName = owner.mountPoint + '.' + params[0];
+      this.set('targetRouteName', fullRouteName);
+    } else {
+      this.set('targetRouteName', params[0]);
+    }
 
     // 3. The last argument (if still remaining) is the `queryParams` object.
     let lastParam = params[params.length - 1];
