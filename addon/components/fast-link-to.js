@@ -173,6 +173,11 @@ let FastLinkComponent = EmberComponent.extend({
 
   queryParams: null,
 
+  /* These two exist to support 1.13. */
+  _computeRouteNameWithQueryParams: Ember.LinkComponent.proto()._computeRouteNameWithQueryParams,
+
+  _handleOnlyQueryParamsSupplied: Ember.LinkComponent.proto()._handleOnlyQueryParamsSupplied,
+
   qualifiedRouteName: Ember.LinkComponent.proto().qualifiedRouteName,
 
   resolvedQueryParams: Ember.LinkComponent.proto().resolvedQueryParams,
