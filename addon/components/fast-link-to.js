@@ -173,6 +173,11 @@ let FastLinkComponent = EmberComponent.extend({
 
   queryParams: null,
 
+  /* These two exist to support 1.13. */
+  _computeRouteNameWithQueryParams: Ember.LinkComponent.proto()._computeRouteNameWithQueryParams,
+
+  _handleOnlyQueryParamsSupplied: Ember.LinkComponent.proto()._handleOnlyQueryParamsSupplied,
+
   qualifiedRouteName: Ember.LinkComponent.proto().qualifiedRouteName,
 
   resolvedQueryParams: Ember.LinkComponent.proto().resolvedQueryParams,
@@ -193,7 +198,7 @@ let FastLinkComponent = EmberComponent.extend({
 
   _modelsAreLoaded: Ember.LinkComponent.proto()._modelsAreLoaded,
 
-  _getModels(params) {
+  _getModels: Ember.LinkComponent.proto()._getModels || function(params) {
     let modelCount = params.length - 1;
     let models = new Array(modelCount);
 
@@ -238,7 +243,13 @@ let FastLinkComponent = EmberComponent.extend({
     // Process the positional arguments, in order.
 
     // 2. `targetRouteName` is now always at index 0.
-    this.set('targetRouteName', params[0]);
+    let owner = Ember.getOwner && Ember.getOwner(this);
+    if (owner && owner.mountPoint) {
+      let fullRouteName = owner.mountPoint + '.' + params[0];
+      this.set('targetRouteName', fullRouteName);
+    } else {
+      this.set('targetRouteName', params[0]);
+    }
 
     // 3. The last argument (if still remaining) is the `queryParams` object.
     let lastParam = params[params.length - 1];
