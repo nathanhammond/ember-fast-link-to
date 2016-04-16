@@ -198,7 +198,7 @@ let FastLinkComponent = EmberComponent.extend({
 
   _modelsAreLoaded: Ember.LinkComponent.proto()._modelsAreLoaded,
 
-  _getModels(params) {
+  _getModels: Ember.LinkComponent.proto()._getModels || function(params) {
     let modelCount = params.length - 1;
     let models = new Array(modelCount);
 
