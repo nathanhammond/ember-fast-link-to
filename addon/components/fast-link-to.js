@@ -244,6 +244,9 @@ let FastLinkComponent = EmberComponent.extend({
   willRender() {
     let queryParams;
 
+    // We will always have a block.
+    this.set('attrs.hasBlock', true);
+
     // Do not mutate params in place
     let params = get(this, 'params').slice();
 
