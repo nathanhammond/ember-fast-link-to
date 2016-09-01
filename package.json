@@ -1,6 +1,6 @@
 {
   "name": "ember-fast-link-to",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Reduced Ember LinkComponent.",
   "directories": {
     "doc": "doc",
