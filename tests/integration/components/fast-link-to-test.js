@@ -30,5 +30,5 @@ test('Functions correctly.', function(assert) {
 
   this.set('nullmodel', null);
   this.render(hbs`{{#fast-link-to 'one' nullmodel}}Link Text{{/fast-link-to}}`);
-  assert.equal(this.$('a').attr('class'), 'ember-view loading', 'Enters loading state with null model.');
+  assert.equal(this.$('a').attr('class').split(' ').sort().join(' '), 'ember-view loading', 'Enters loading state with null model.');
 });
