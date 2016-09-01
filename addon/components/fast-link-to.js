@@ -171,6 +171,15 @@ let FastLinkComponent = EmberComponent.extend({
   */
   _invoke: Ember.LinkComponent.proto()._invoke,
 
+  /**
+    As of 2.7 series, this function actually initiates the transition. Having
+    it available in older version will do nothing.
+
+    @private
+    @method _generateTransition
+  */
+  _generateTransition: Ember.LinkComponent.proto()._generateTransition,
+
   queryParams: null,
 
   /* These two exist to support 1.13. */
