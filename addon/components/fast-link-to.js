@@ -241,7 +241,7 @@ let FastLinkComponent = EmberComponent.extend({
   */
   loadingHref: '#',
 
-  willRender() {
+  didRecieveAttrs() {
     let queryParams;
 
     // We will always have a block.
