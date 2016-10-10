@@ -19,7 +19,7 @@ moduleForComponent('fast-link-to', 'Integration | Component | fast link to', {
 });
 
 test('Functions correctly.', function(assert) {
-  assert.expect(4);
+  assert.expect(5);
 
   this.render(hbs`{{#fast-link-to 'one' 12}}Link Text{{/fast-link-to}}`);
   assert.equal(this.$().text().trim(), 'Link Text', "Passes through yield.");
@@ -27,6 +27,9 @@ test('Functions correctly.', function(assert) {
 
   this.render(hbs`{{#fast-link-to 'four'}}Link Text{{/fast-link-to}}`);
   assert.equal(this.$('a').attr('href'), '/four', 'Generates href properly without query params.');
+
+  this.render(hbs`{{#fast-link-to 'four' id="asdf"}}Link Text{{/fast-link-to}}`);
+  assert.equal(this.$('a').attr('id'), 'asdf', 'Allows override of ID.');
 
   this.set('nullmodel', null);
   this.render(hbs`{{#fast-link-to 'one' nullmodel}}Link Text{{/fast-link-to}}`);
