@@ -1,7 +1,10 @@
 import Ember from 'ember';
 
 export default Ember.LinkComponent.extend({
-  classNameBindings: ['loading', 'disabled']
+  init() {
+    this._super(arguments);
+    this.classNameBindings = ['loading', 'disabled'];
+  }
 });
 
 // import layout from '../templates/components/fast-link-to';
