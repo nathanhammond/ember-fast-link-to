@@ -1,14 +1,28 @@
 import Ember from 'ember';
 import layout from '../templates/components/fast-link-to';
 
-let { get } = Ember;
-let EmberComponent = Ember.Component;
+let { Component, generateGuid, get, getOwner, LinkComponent } = Ember;
 
-var linkProto = Ember.LinkComponent.proto();
-var properties = Object.keys(linkProto);
-var fastLinkProto = {};
+function findOriginal(PrototypeMixin) {
+  if (!PrototypeMixin.ownerConstructor) { return; }
 
-for (var i = 0; i < properties.length; i++) {
+  let result;
+  let identity = PrototypeMixin.ownerConstructor.toString();
+  if (identity === 'LinkComponent') {
+    return PrototypeMixin.mixins[1].properties;
+  } else {
+    for (let i = 0; i < PrototypeMixin.mixins.length; i++) {
+      result = findOriginal(PrototypeMixin.mixins[i]);
+      if (result) { return result; }
+    }
+  }
+}
+
+let linkProto = findOriginal(LinkComponent.PrototypeMixin);
+let properties = Object.keys(linkProto);
+let fastLinkProto = {};
+
+for (let i = 0; i < properties.length; i++) {
   fastLinkProto[properties[i]] = linkProto[properties[i]];
 }
 
@@ -18,7 +32,7 @@ fastLinkProto.layout = layout;
 function supportEngines() {
   let params = get(this, 'params');
 
-  let owner = Ember.getOwner && Ember.getOwner(this);
+  let owner = getOwner && getOwner(this);
   if (owner && owner.mountPoint) {
     let fullRouteName = owner.mountPoint + '.' + params[0];
     this.set('targetRouteName', fullRouteName);
@@ -27,10 +41,17 @@ function supportEngines() {
 
 if (linkProto.willRender) {
   fastLinkProto.init = function() {
-    // Support 1.13+
-    // We will always have a block.
-    this.set('attrs.hasBlock', true);
     linkProto.init.apply(this, arguments);
+
+    // Support 1.13.
+    // Harmless in other versions.
+    this.set('attrs.hasBlock', true);
+
+    // Support 1.13 and 2.0 which don't set up `elementId`.
+    var elementId = this.get('elementId');
+    if (!elementId) {
+      this.set('elementId', generateGuid());
+    }
   };
   fastLinkProto.willRender = function() {
     linkProto.willRender.apply(this, arguments);
@@ -43,7 +64,7 @@ if (linkProto.willRender) {
   };
 }
 
-let FastLinkComponent = EmberComponent.extend(fastLinkProto);
+let FastLinkComponent = Component.extend(fastLinkProto);
 
 FastLinkComponent.toString = function() { return 'FastLinkComponent'; };
 
